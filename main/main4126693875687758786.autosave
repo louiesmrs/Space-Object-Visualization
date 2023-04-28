@@ -1,0 +1,195 @@
+Table basicTable;
+Datapoint object1;
+Datapoint[] objects;
+ArrayList<Datapoint> objectList;
+QueryResults queryResults; 
+Screen mainScreen;
+Screen screenX, screenMass, screenDiameter, screenPerigee, screenApogee; //and so on for however many we end up needing, feel free to add them 
+ //feel free to change name
+
+final int EVENT_BUTTON1=1;
+final int EVENT_BUTTON2=2;
+final int EVENT_BUTTON3=3;
+final int EVENT_BUTTON4 =4;
+final int EVENT_BUTTON5 =5;
+final int EVENT_NULL=0;
+
+String name, date, status, state, jcat, piece, type, plname, parent, sdate, primary, destination, owner, manufacturer, bus, motor, shape, odate, opOrbit, oQual, altNames;
+double mass, diameter, perigee, apogee, massFlag, dryMass, dryFlag, totMass, totFlag, lengthX, lFlag, dFlag, span, spanFlag, pf, af, inc, iFlag;
+int sat;
+
+
+void setup() {
+  Widget massGraph, diameterGraph, perigeeGraph, apogeeGraph, Home;
+  PFont myFont = loadFont("Impact-18.vlw");
+  textFont(myFont);
+  readData();
+  object1 = new Datapoint(sat, name, date, status, state, mass, diameter, perigee, apogee);
+  objectList = new ArrayList<Datapoint>();
+  screenX = new Screen(color(0, 255, 0));
+  screenMass = new Screen(color(255, 0, 0));
+  screenDiameter=new Screen(color(200, 100, 100));
+  screenPerigee = new Screen(color(0, 0, 255));
+  screenApogee = new Screen(color(0, 100, 255));
+  
+
+  
+  
+  massGraph = new Widget(100, 100, 180, 40, "Mass Graph", color(200, 180, 0), myFont, EVENT_BUTTON1 ); //fill with constructors
+  diameterGraph= new Widget(100, 200, 180, 40, "Diameter Graph", color(200, 180, 0), myFont, EVENT_BUTTON2);
+  perigeeGraph= new Widget(100, 300, 180, 40, "Perigee Graph", color(200,180,0), myFont, EVENT_BUTTON3);
+  apogeeGraph=new Widget(100, 400, 180, 40, "Apogee Graph", color(200,180,0), myFont, EVENT_BUTTON4);
+  Home=new Widget(0,0,60,40, "Home", color(255,0,0), myFont, EVENT_BUTTON5);
+  size(600, 600);
+  for (int i = 0; i < objects.length; i++){
+    objectList.add(objects[i]);
+  }
+  screenX= new Screen(color(200));
+  screenX.addWidgets(massGraph);
+  screenX.addWidgets(diameterGraph);
+  screenX.addWidgets(perigeeGraph);
+  screenX.addWidgets(apogeeGraph);
+  screenMass=new Screen(color(150));
+  screenMass.addWidgets(Home);
+  screenMass.addBarGraph(new BarGraphWidget(5, 50, queryResults.getLongestString("Name", 10, 27), queryResults.getFloatList("Mass", 27).max(), 20, queryResults.getStringArray("Name", 27), queryResults.getFloatList("Mass", 27), myFont, false));
+  
+  screenDiameter=new Screen(color(150));
+  screenDiameter.addWidgets(Home);
+  screenDiameter.addBarGraph(new BarGraphWidget(5, 50, queryResults.getLongestString("Name", 10, 27), 300, 20, queryResults.getStringArray("Name", 27), queryResults.getFloatList("Diameter", 27), myFont, false));
+  screenPerigee=new Screen(color(150));
+  screenPerigee.addWidgets(Home);
+  screenPerigee.addBarGraph(new BarGraphWidget(5, 50, queryResults.getLongestString("Name", 10, 27), 300, 20, queryResults.getStringArray("Name", 27), queryResults.getFloatList("Perigee", 27), myFont, true));
+  screenApogee=new Screen(color(150));
+  screenApogee.addWidgets(Home);
+  screenApogee.addBarGraph(new BarGraphWidget(5, 50, queryResults.getLongestString("Name", 10, 27), 300, 20, queryResults.getStringArray("Name", 27), queryResults.getFloatList("Apogee", 27), myFont, true));//0000
+  mainScreen=screenX;
+}
+
+void draw(){
+  mainScreen.draw();
+  //for (int i = 0; i<objectList.size(); i++){
+  //  objectList.get(i).draw();
+  //}
+}
+
+void readData(){
+  
+  basicTable = loadTable("gcat1k.tsv", "header");
+  objects = new Datapoint[basicTable.getRowCount()];
+
+  println(basicTable.getRowCount() + " total rows in table");
+
+  for (int i = 0; i < basicTable.getRowCount(); i++) {
+    
+    TableRow row = basicTable.getRow(i);
+    
+    jcat = row.getString("#JCAT");
+    sat = row.getInt("Satcat");
+    piece = row.getString("Piece");
+    type = row.getString("Type");
+    name = row.getString("Name");
+    plname = row.getString("PLName");
+    date = row.getString("LDate");
+    parent = row.getString("Parent");
+    sdate = row.getString("SDate");
+    primary = row.getString("Primary");
+    status = row.getString("Status");
+    destination = row.getString("Dest");
+    owner = row.getString("Owner");
+    state = row.getString("State");
+    manufacturer = row.getString("Manufacturer");
+    bus = row.getString("Bus");
+    motor = row.getString("Motor");
+    mass = row.getDouble("Mass");
+    massFlag = row.getDouble("MassFlag");
+    dryMass = row.getDouble("DryMass");
+    dryFlag = row.getDouble("DryFlag");
+    totMass = row.getDouble("TotMass");
+    totFlag = row.getDouble("TotFlag");
+    lengthX = row.getDouble("Length");
+    lFlag = row.getDouble("LFlag");
+    diameter = row.getDouble("Diameter");
+    dFlag = row.getDouble("DFlag");
+    span = row.getDouble("Span");
+    spanFlag = row.getDouble("SpanFlag");
+    shape = row.getString("Shape");
+    odate = row.getString("ODate");
+    perigee = row.getDouble("Perigee");
+    pf = row.getDouble("PF");
+    apogee = row.getDouble("Apogee");
+    af = row.getDouble("AF");
+    inc = row.getDouble("Inc");
+    iFlag = row.getDouble("IF");
+    opOrbit = row.getString("OpOrbit");
+    oQual = row.getString("OQUAL");
+    altNames = row.getString("AltNames");
+    
+    objects[i] = new Datapoint(sat, name, date, status, state, mass, diameter, perigee, apogee);
+  }
+    basicTable.removeColumn("#JCAT");
+    basicTable.removeColumn("Piece");
+    basicTable.removeColumn("Type");
+    basicTable.removeColumn("PLName");
+    basicTable.removeColumn("Parent");
+    basicTable.removeColumn("SDate");
+    basicTable.removeColumn("Primary");
+    basicTable.removeColumn("Dest");
+    basicTable.removeColumn("Owner");
+    basicTable.removeColumn("Manufacturer");
+    basicTable.removeColumn("Bus");
+    basicTable.removeColumn("Motor");
+    basicTable.removeColumn("MassFlag");
+    basicTable.removeColumn("DryMass");
+    basicTable.removeColumn("DryFlag");
+    basicTable.removeColumn("TotMass");
+    basicTable.removeColumn("TotFlag");
+    basicTable.removeColumn("Length");
+    basicTable.removeColumn("LFlag");
+    basicTable.removeColumn("DFlag");
+    basicTable.removeColumn("Span");
+    basicTable.removeColumn("SpanFlag");
+    basicTable.removeColumn("Shape");
+    basicTable.removeColumn("ODate");
+    basicTable.removeColumn("PF");
+    basicTable.removeColumn("AF");
+    basicTable.removeColumn("Inc");
+    basicTable.removeColumn("IF");
+    basicTable.removeColumn("OpOrbit");
+    basicTable.removeColumn("OQUAL");
+    basicTable.removeColumn("AltNames");
+    queryResults = new QueryResults(basicTable);
+  
+  //  //println(sat + " Name: " + name + ", Launch Date: " + date + ", Status: " + status + ", State: " + state + 
+  //  //", Mass: " + mass + " kg, Diameter: " + diameter + " m, Perigee: " + perigee + " km, Apogee: " + apogee + " km") ;
+    
+  //  //ArrayList<Datapoint> List = new ArrayList<Datapoint>();
+  //  //List.add(name, date, status, state, mass, diameter, perigee, apogee);
+  
+}
+  
+  void mousePressed(){
+    int event;
+    event = mainScreen.getEvent(mouseX, mouseY);
+    switch (event) {
+      case EVENT_BUTTON1:
+        println("Mass Graph");
+        mainScreen=screenMass;
+        break;
+      case EVENT_BUTTON2:
+        println("Diameter Graph");
+        mainScreen=screenDiameter;
+        break;
+      case EVENT_BUTTON3:
+        println("Perigee Graph");
+        mainScreen=screenPerigee;
+        break;  
+      case EVENT_BUTTON4:
+        println("Apogee Graph");
+        mainScreen=screenApogee;
+        break;
+      case EVENT_BUTTON5:
+        println("Home");
+        mainScreen=screenX;
+        break;
+    }
+  }

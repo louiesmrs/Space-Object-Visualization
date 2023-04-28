@@ -1,0 +1,17 @@
+final int SCREENX = 1067;
+final int SCREENY = 600;
+final int DEFAULTTEXTSIZE = 15;
+final color GREY1 = color(25, 25, 25);
+final color GREY2 = color(32, 32, 32);
+final color GREY3 = color(90, 90, 90);
+final color GREY4 = color(211, 211, 211);
+final color TEXTGREY = color(155, 155, 155);
+final color TEXTWHITE = color(255, 255, 255);
+final color TEXTBLACK = color(0);
+final color RED = color(235, 87, 87);
+final color BACKGROUNDWHITE = color(246, 246, 246);
+final color BACKGROUNDWHITEOP = color(246, 246, 246, 0);
+final color LIGHT_BLUE = color(201, 222, 255);
+final color DARK_BLUE = color(52, 101, 235, 195);
+final color TEAL = color(52, 229, 235);
+final color PURPLE = color(168, 52, 235);

@@ -1,0 +1,234 @@
+import java.util.Objects;
+Table basicTable;
+Datapoint object1;
+Datapoint[] objects;
+ArrayList<Datapoint> objectList;
+QueryResults queryResults;
+TextWidget insertName, focus;
+Widget mainScreen;
+StringBuilder stringBuilder;
+int keyCount = -1;
+boolean summary = false;
+int numberOfObjects = 0;
+
+BarGraphScreen screenMass;
+DateClass screenDate;
+Screen screenX, screenDiameter, screenPerigee, screenApogee, screenSummary; //and so on for however many we end up needing, feel free to add them 
+ //feel free to change name
+
+final int EVENT_BUTTON1=1;
+final int EVENT_BUTTON2=2;
+final int EVENT_BUTTON3=3;
+final int EVENT_BUTTON4 =4;
+final int EVENT_BUTTON5 =5;
+final int EVENT_TEXTNAME =6;
+final int EVENT_BUTTON7 =7;
+final int EVENT_NULL=0;
+PImage bg;
+String name, date, status, state, jcat, piece, type, plname, parent, sdate, primary, destination, owner, manufacturer, bus, motor, shape, odate, opOrbit, oQual, altNames;
+double mass, diameter, perigee, apogee, massFlag, dryMass, dryFlag, totMass, totFlag, lengthX, lFlag, dFlag, span, spanFlag, pf, af, inc, iFlag;
+int sat;
+Boolean keyValid = false;
+
+void settings() {
+  size(SCREENX, SCREENY);
+}
+void setup() {
+  Widget massGraph, diameterGraph, perigeeGraph, apogeeGraph, introText, dateRange, Home;
+  PFont myFont = loadFont("HelveticaNeue-Light-18.vlw");
+  textFont(myFont);
+  bg = loadImage("spaceresized.jpg");
+  readData();
+  //object1 = new Datapoint(sat, name, date, status, state, mass, diameter, perigee, apogee);
+  //objectList = new ArrayList<Datapoint>();
+  //for (int i = 0; i < objects.length; i++){
+  //  objectList.add(objects[i]);
+  //}
+  screenX = new Screen(color(0, 255, 0));
+  //screenMass = new Screen(color(255, 0, 0));
+  screenDiameter=new Screen(color(200, 100, 100));
+  screenPerigee = new Screen(color(0, 0, 255));
+  screenApogee = new Screen(color(0, 100, 255));
+  screenSummary = new Screen(color(255));
+  //screenDate = new Screen(color(0, 100, 255));
+  massGraph = new Widget(100, 100, 180, 40, "Mass Graph", color(200, 180, 0), myFont, EVENT_BUTTON1 ); //fill with constructors
+  diameterGraph= new Widget(100, 200, 180, 40, "Diameter Graph", color(200, 180, 0), myFont, EVENT_BUTTON2);
+  perigeeGraph= new Widget(100, 300, 180, 40, "Perigee Graph", color(200,180,0), myFont, EVENT_BUTTON3);
+  apogeeGraph=new Widget(100, 400, 180, 40, "Apogee Graph", color(200,180,0), myFont, EVENT_BUTTON4);
+  dateRange=new Widget(100, 500, 180, 40, "Date Range", color(200,180,0), myFont, EVENT_BUTTON7);
+  introText = new Widget(420, 200, 250, 80 , "Welcome!\nClick on this Widget\n to see the bar\nchart of each of the attributes.", color(255), myFont, 
+  EVENT_BUTTON1, DEFAULTTEXTSIZE, 5, 20, color(0));
+  Home=new Widget(5,5,55,40, "Home", LIGHT_BLUE, myFont, EVENT_BUTTON5);
+  insertName = new TextWidget(400, 0, 290, 40, "Insert Country Name and press enter", color(255), myFont, EVENT_TEXTNAME, 25);
+  stringBuilder = new StringBuilder();
+  
+  String[] attributes = new String[] { "Mass", "Diameter", "Perigee", "Apogee"};
+  ArrayList<String> attrsList = new ArrayList();
+  attrsList.addAll(java.util.Arrays.asList(attributes));
+  screenMass=new BarGraphScreen(LIGHT_BLUE, "Choose...", color(200), myFont, -1, 10, attrsList);
+  String[] dataRanges = new String[] { "40s", "50s", "60s", "70s", "80s", "90s", "00s"};
+  ArrayList<String> dateRangesList = new ArrayList();
+  dateRangesList.addAll(java.util.Arrays.asList(dataRanges));
+  screenDate=new DateClass(color(200), "Choose...", color(200), myFont, -1, 10, dateRangesList);
+  screenX= new Screen(color(200));
+
+  //screenX.addWidget(massGraph);
+  //screenX.addWidget(diameterGraph);
+  //screenX.addWidget(perigeeGraph);
+  //screenX.addWidget(apogeeGraph);
+  screenX.addWidget(introText);
+  screenX.addWidget(insertName);
+  //screenX.addWidget(dateRange);
+  screenMass.addWidget(Home);
+  //screenMass.addBarGraph(new BarGraphWidget(5, 50, queryResults.getLongestString("Name", 10, 27), SCREENX/2, 20, queryResults.getStringArray("Name", 27), queryResults.getFloatList("Mass", 27), myFont, false));
+  screenDiameter=new Screen(color(150));
+  screenDiameter.addWidget(Home);
+  //screenDiameter.addBarGraph(new BarGraphWidget(5, 50, queryResults.getLongestString("Name", 10, 27), 300, 20, queryResults.getStringArray("Name", 27), queryResults.getFloatList("Diameter", 27), myFont, false));
+  screenPerigee=new Screen(color(150));
+  screenPerigee.addWidget(Home);
+  //screenPerigee.addBarGraph(new BarGraphWidget(5, 50, queryResults.getLongestString("Name", 10, 27), 300, 20, queryResults.getStringArray("Name", 27), queryResults.getFloatList("Perigee", 27), myFont, true));
+  screenApogee=new Screen(color(150));
+  screenApogee.addWidget(Home);
+  //screenDate=new Screen(color(150));
+  screenDate.addWidget(Home);
+ //screenApogee.addBarGraph(new BarGraphWidget(5, 50, queryResults.getLongestString("Name", 10, 27), 300, 20, queryResults.getStringArray("Name", 27), queryResults.getFloatList("Apogee", 27), myFont, true));//0000
+  screenSummary.addWidget(Home);
+  mainScreen=screenX;
+ ;
+}
+
+void draw(){
+  mainScreen.draw();
+  if (summary){
+    fill(255);
+    text("Number of Objects Owned by " + stringBuilder + ": " + numberOfObjects, 100, 50);
+    queryResults.draw();
+  }
+}
+
+void readData(){
+  
+  basicTable = loadTable("gcat.tsv", "header");
+  //objects = new Datapoint[basicTable.getRowCount()];
+
+  println(basicTable.getRowCount() + " total rows in table");
+
+  for (int i = 0; i < basicTable.getRowCount(); i++) {
+    
+    TableRow row = basicTable.getRow(i);
+    
+    jcat = row.getString("#JCAT");
+    sat = row.getInt("Satcat");
+    name = row.getString("Name");
+    date = row.getString("LDate");
+    status = row.getString("Status");
+    state = row.getString("State");
+    mass = row.getDouble("Mass");
+    diameter = row.getDouble("Diameter");
+    perigee = row.getDouble("Perigee");
+    apogee = row.getDouble("Apogee");
+    /*piece = row.getString("Piece");
+    type = row.getString("Type");
+    plname = row.getString("PLName");
+    parent = row.getString("Parent");
+    sdate = row.getString("SDate");
+    primary = row.getString("Primary");
+    destination = row.getString("Dest");
+    owner = row.getString("Owner");
+    manufacturer = row.getString("Manufacturer");
+    bus = row.getString("Bus");
+    motor = row.getString("Motor");
+    massFlag = row.getDouble("MassFlag");
+    dryMass = row.getDouble("DryMass");
+    dryFlag = row.getDouble("DryFlag");
+    totMass = row.getDouble("TotMass");
+    totFlag = row.getDouble("TotFlag");
+    lengthX = row.getDouble("Length");
+    lFlag = row.getDouble("LFlag");
+    dFlag = row.getDouble("DFlag");
+    span = row.getDouble("Span");
+    spanFlag = row.getDouble("SpanFlag");
+    shape = row.getString("Shape");
+    odate = row.getString("ODate");
+    pf = row.getDouble("PF");
+    af = row.getDouble("AF");
+    inc = row.getDouble("Inc");
+    iFlag = row.getDouble("IF");
+    opOrbit = row.getString("OpOrbit");
+    oQual = row.getString("OQUAL");
+    altNames = row.getString("AltNames");*/
+    
+    //objects[i] = new Datapoint(sat, name, date, status, state, mass, diameter, perigee, apogee);
+  }
+  
+    queryResults = new QueryResults(basicTable);  
+}
+  
+  void mousePressed(){
+    int event;
+    event = mainScreen.getEvent(mouseX, mouseY);
+    switch (event) {
+      case EVENT_BUTTON1:
+        println("User Interaction");
+        mainScreen=screenMass;
+        break;
+      case EVENT_BUTTON2:
+        println("Diameter Graph");
+        mainScreen=screenDiameter;
+        break;
+      case EVENT_BUTTON3:
+        println("Perigee Graph");
+        mainScreen=screenPerigee;
+        break;  
+      case EVENT_BUTTON4:
+        println("Apogee Graph");
+        mainScreen=screenApogee;
+        break;
+      case EVENT_BUTTON5:
+        println("Home");
+        mainScreen=screenX;
+        summary = false;
+        queryResults.clearArray();
+        break;
+       case EVENT_TEXTNAME:
+        println("text widget");
+        keyValid = true;
+        focus = insertName;
+        break;
+        case EVENT_BUTTON7:
+        println("Data Range");
+        mainScreen=screenDate;
+        break;
+      default:   
+        screenMass.mousePressEvent(mouseX, mouseY);
+        //screenDate.mousePressEvent(mouseX, mouseY);
+    }
+  }
+  void keyPressed(){
+  if(mainScreen == screenMass) {screenMass.keyPressedEvent(keyCode, key);}
+  if(keyValid) {
+        focus.append(key);
+    if (key != BACKSPACE && key != ENTER){
+      stringBuilder.append(key);
+      keyCount++;
+    }
+    if (key == BACKSPACE && keyCount>= 0){
+      stringBuilder.deleteCharAt(keyCount);
+      keyCount--;
+      println(keyCount);
+    }
+    if (key == ENTER){
+    mainScreen = screenSummary;
+    println(stringBuilder);     
+    numberOfObjects = queryResults.numberOfObjects(stringBuilder.toString());
+    summary = true;
+    }
+    }
+  }    
+  
+  void mouseMoved() { 
+     screenMass.mouseMovedEvent(mouseX, mouseY);
+     //screenDate.mouseMovedEvent(mouseX, mouseY);
+  }
+
+ 
